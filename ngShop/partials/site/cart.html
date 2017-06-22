@@ -1,0 +1,74 @@
+<div class="container">
+	<form id="paypalForm" name="myForm" ng-submit ="setOrder( $event )" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+	<div class="row">
+		<div class="col-sm-12">
+			<div ng-if="alert"  class="alert alert-{{alert.type}}">{{alert.msg}}</div>
+			<div class="alert alert-info" ng-if="!cartSrv.length"> Koszyk jest pusty. Dodaj jakiś produkt... </div>
+			<div ng-if="cartSrv.length">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+					<th>Nazwa</th>
+					<th>Waga</th>
+					<th>Cena</th>
+					<th>Ilość</th>
+					<th>Razem</th>
+					<th>Usuń</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="item in cartSrv">
+						<td>{{item.nazwa}}</td>
+						<td>{{item.waga}}</td>
+						<td>{{item.cena | number:2}}</td>
+						<td>
+							<div class="form-group" ng-class="{'has-error':myForm.input{{$index}}.$error.required || myForm.input{{$index}}.$error.number || myForm.input{{$index}}.$error.min || myForm.input{{$index}}.$error.max }">
+							<input name="input{{$index}}" class ="form form-control" style="width:80px" type="number" ng-model= "item.qty" min="1" max="20" required></input></div>
+							<span class="text-danger" ng-show="myForm.input{{$index}}.$error.required">Podaj ilość</span>
+							<span class="text-danger" ng-show="myForm.input{{$index}}.$error.number">Tylko cyfry</span>
+							<span class="text-danger" ng-show="myForm.input{{$index}}.$error.max>Nie mamy tyle..."</span>
+							<span class="text-danger" ng-show="myForm.input{{$index}}.$error.min>?? ... jak to"</span>
+						</div>
+						</td>
+						<td>{{item.cena * item.qty | number:2}}</td>
+						<td><button class= "btn btn-danger btn-xs" ng-click="removeItem($index)"><strong>&times</strong></button></td>
+					</tr>
+					<tr>
+						<td colspan="4"></td>
+						 <td><h3><strong>Suma: {{total() | number:2}} zł</strong></h3></td>
+					</tr> 
+					
+				</tbody>
+				
+			</table>
+
+<input type="hidden" name="cmd" value="_cart">
+				  <input type="hidden" name="upload" value="1">
+				  <input type="hidden" name="business" value="krystian.buratowski@gmail.pl">
+				  <input type="hidden" name="charset" value="utf-8"> <!-- wartosc kodowania, żeby niebylo ogonków czasem zamiast ą ę -->
+				  <input type="hidden" name="currency_code" value="PLN"> <!-- kod waluty -->
+					<div ng-repeat='item in cartSrv'>
+				  <input type="hidden" name="item_name_{{$index+1}}" value="{{item.nazwa}}">
+				  <input type="hidden" name="quantity_{{$index+1}}" value="{{item.qty}}">
+				  <input type="hidden" name="amount_{{$index+1}}" value="{{item.cena}}">
+				  	</div>
+				 
+				  <input type="image" name="submit" ng-disabled="!myForm.$valid"
+				    src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif"
+				    alt="PayPal - The safer, easier way to pay online">
+					
+
+
+			<button ng-click="clearCart()" class="btn btn-danger">Wyczyść koszyk</button>
+
+			</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+

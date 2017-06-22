@@ -1,0 +1,62 @@
+<div class="container">
+  
+  <div class="row">
+   
+
+  </div>
+	
+	<div class="row">
+		<div class="col-sm-12">
+      		<table class="table table">
+        		<thead>
+        			<tr>
+        				<th>ID</th>
+        				<th>Imię</th>
+        				<th>Email</th>
+        				<th>Koszyk</th>
+        				<th>Do zapłaty</th>
+                <th>Status</th>
+        			</tr>
+        		</thead>
+        		<tbody>
+        			<tr ng-repeat="order in orders | filter: search">
+        				<td>{{order.id}}</td>
+        				<td>{{order.name}}</td>
+        				<td>{{order.email}}</td>
+                <td>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                      <th>Produkt</th>
+                        <th>Cena</th>
+                        <th>Waga</th>
+                        <th>Ilość</th>
+                        <th>Razem</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="item in order.items">
+                        <td>{{item.name}}</td>
+                        <td>{{item.price}}</td>
+                        <td>{{item.weigth}}</td>
+                        <td>{{item.qty}}</td>
+                        <td>{{item.qty*item.price | number:2}} zł</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td><h3>{{order.total}} zł</h3></td>
+        				<td><button ng-if="order.status == 0" disabled class="btn btn-warning btn-sm">Oczekuje</span></button>
+                <button ng-if= "order.status == 1" disabled class="btn btn-success btn-sm">Wysłano</span></button></td>
+        				
+        			</tr>
+        		</tbody>
+
+        	</table>
+        	        	
+      </div>
+      </div>
+       
+	</div>	
+
+</div>

@@ -1,0 +1,26 @@
+<div class="container">
+  
+  <div class="row">
+    <div class="col-xs-6">
+      <input type="text" class="form-control" placeholder="Szukaj" ng-model="search"/>
+      
+      <br>
+    </div>
+    <div class="col-xs-6">
+      <a href="#/admin/product/create" class="btn btn-success pull-right">Nowy produkt</a>
+    </div>
+  </div>
+
+    <div ng-controller="products">
+      <div class="alert alert-info" ng-repeat="product in products | filter:search">
+        <span class="text-capitalize">{{product.nazwa}}</span> <br>
+        waga : {{product.waga}} <br>
+        opis : {{product.opis}} <br>
+        cena : {{product.cena | number:2}} <br>
+        <p>&nbsp;</p>
+        <a href="#/admin/product/edit/{{product.id}}" class="btn btn-default"> Edytuj </a>
+        <button ng-click="delete(product, $index)" class="btn btn-danger pull-right" > Usuń </button> <!-- tu zostaje $index bo on jest potrzebny do usuwania ze scope, a {{product.id to juz z bazy}} -->
+      </div>      
+    </div>
+
+</div>
