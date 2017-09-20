@@ -15,6 +15,7 @@
         <div class="panel-body" ng-init="checkCart(product)">
           <h2><span class ="label label-warning pull-right">  {{product.cena | number:2}} zł / kg</span></h2>
           <a class= "text-capitalize" href="#/product/{{product.id}}"><h2>{{product.nazwa}}</h2></a>
+          <img src="uploads/{{product.id}}/{{product.thumb}}" alt="" class="img-thumbnail" style="max-width:300px">
                
           <p>&nbsp;</p>
           <a href="#/product/{{product.id}}" class="btn btn-info"> Szczegóły </a>

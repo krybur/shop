@@ -115,7 +115,7 @@
        <div ng-repeat="image in images">
         <div class="pull-left" style="position:relative;">
             <button ng-click="delImg( image, $index )" type="button" class="btn btn-danger btn-xs" style="position:absolute; right:0;" >&times;</button>
-           <img ng-src="uploads/{{id}}/{{image}}" alt="" style="width:150px; margin:5px; height:150px;" class="img-thumbnail">  <!-- ng-src wyswietla zdjecia w odpowiednim momencie ladowania strony, np nie wyprzedza innych tresci -->
+           <img ng-click="setThumb(product, image)" ng-src="uploads/{{id}}/{{image}}" alt="" style="width:150px; margin:5px; height:150px; cursor:pointer" class="img-thumbnail">  <!-- ng-src wyswietla zdjecia w odpowiednim momencie ladowania strony, np nie wyprzedza innych tresci -->
             
         </div>
        </div>             

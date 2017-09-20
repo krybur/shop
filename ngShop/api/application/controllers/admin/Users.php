@@ -11,6 +11,12 @@ class Users extends CI_Controller {
 
 		$this->load->model('admin/Users_model'); //doładowanie modelu przed updatem, czy deletem
 
+		$token = $this->input->post('token');
+		$token = $this->jwt->decode($token, config_item('encryption_key'));
+
+		if ($token->role != 'admin')
+			exit('nie jestes adminem');
+
 		// ta funkcja construct działa tak, ze każdy kod umieszczony w konstruktorze, działa w każdej metodzie niżej w public function, np w każdej z metod niżej bedziemy potrzebowali konwersji danych wchodzących z angulara z jsona do posta. I z automatu działa to w każdej metodzie wywoływanej przez angular niżej \/ \/ \/ 
 	}
 

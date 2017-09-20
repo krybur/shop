@@ -40,9 +40,9 @@
                     </thead>
                     <tbody>
                       <tr ng-repeat="item in order.items">
-                        <td>{{item.name}}</td>
-                        <td>{{item.price}}</td>
-                        <td>{{item.weigth}}</td>
+                        <td>{{item.nazwa}}</td>
+                        <td>{{item.cena}}</td>
+                        <td>{{item.waga}}</td>
                         <td>{{item.qty}}</td>
                         <td>{{item.qty*item.price | number:2}} zł</td>
                       </tr>
@@ -52,7 +52,7 @@
                 <td><h3>{{order.total}} zł</h3></td>
         				<td><button ng-if="order.status == 0" ng-click ="changeStatus(order)" class="btn btn-warning btn-sm">Oczekuje</span></button>
                 <button ng-if= "order.status == 1" ng-click ="changeStatus(order)" class="btn btn-success btn-sm">Wysłano</span></button></td>
-        				<td><button ng-click="delete(user, $index)" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span></button></td>
+        				<td><button ng-click="delete(order, $index)" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span></button></td>
         			</tr>
         		</tbody>
 

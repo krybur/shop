@@ -3,6 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //Ta klasa zawiera skopiwoany kod z części bacendowej ze skryptu do uploadu zdjec (z przeciągania) copy/paste z githuba
 class Images extends CI_Controller {
 
+	public function __construct()
+	{
+		parent::__construct();
+
+		$this->load->model( 'admin/Products_model' );
+	}
+
 	public function upload( $id ) // id bedzie przekazywane, bęzie służylo do robienia folderu dla zdjęcia/zdjęć
 	{
 
@@ -65,6 +72,13 @@ class Images extends CI_Controller {
 		$post = file_get_contents('php://input');
 		$_POST = json_decode($post, true); //można zwrócić bez true jako obiekt, albo z true jako tablica
 		
+
+		$token = $this->input->post( 'token' );
+		$token = $this->jwt->decode( $token , config_item( 'encryption_key' ) );	
+
+		if ( $token->role != 'admin' )
+			exit( 'Nie jesteś adminem' );
+
 		// to powyżej służu do zdekodowania tego co przyszło ze strony w jsonie
 		$id = $this->input->post('id'); //to funkcjonalność codeignitera, tak jest w PHP >> $_POST['id'], ale to nie jest chroniione 								 przez atakami swll injection
 		$image = $this->input->post('image');
@@ -74,9 +88,25 @@ class Images extends CI_Controller {
 
 		unlink($imagePath);
 
+	}
 
+	public function setThumb ()
+	{
+		$input = $this->input->post('product');
+		$productId = $input['id'];
+
+		$token = $this->input->post( 'token' );
+		$token = $this->jwt->decode( $token , config_item( 'encryption_key' ) );	
+
+		if ( $token->role != 'admin' )
+			exit( 'Nie jesteś adminem' );
+
+		$imageName = $this->input->post('image');
+		$product['thumb'] = $imageName ;
+
+		$this->Products_model->setThumb($productId , $product);
 
 	}
 
-}
 
+}

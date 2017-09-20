@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module( 'app' , ['ngRoute', 'angular-storage' , 'controllersNavigation', 'controllersAdmin' , 'controllersSite', 'myServices'] );   //'ngRoute to poprostu dołączony moduł ngroute, który podpięto do projektu'
+var app = angular.module( 'app' , ['ngRoute', 'angular-storage', 'angular-jwt' , 'controllersNavigation', 'controllersAdmin' , 'controllersSite', 'myServices'] );   //'ngRoute to poprostu dołączony moduł ngroute, który podpięto do projektu'
 
 app.config( [ '$routeProvider' , '$httpProvider' , function( $routeProvider, $httpProvider ){
 

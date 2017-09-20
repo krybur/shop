@@ -2,9 +2,11 @@
 
 var controllersAdmin = angular.module('controllersAdmin' , ['angularFileUpload', 'myDirectives']);
 
-controllersAdmin.controller( 'products' , [ '$scope' , '$http' , function( $scope , $http){
+controllersAdmin.controller( 'products' , [ '$scope' , '$http', 'checkToken' , function( $scope , $http, checkToken){
 
-  $http.get( 'api/admin/products/get/' ). // opuszczamy application i controllers bo chyba domyslnie to przenosi, ostatnie to funkcja zapisana w kontrolerze
+  $http.post( 'api/admin/products/get/', {
+    token : checkToken.raw()
+  } ). // opuszczamy application i controllers bo chyba domyslnie to przenosi, ostatnie to funkcja zapisana w kontrolerze
   success( function( data ){
     $scope.products = data;
   }).error( function(){
@@ -20,7 +22,8 @@ controllersAdmin.controller( 'products' , [ '$scope' , '$http' , function( $scop
     $scope.products.splice( $index, 1 ); //(ktory indeks zaczyna, ile elementow usunac, ewentualnie dodac)
 
     $http.post( 'api/admin/products/deleteProduct/' , {
-      product:product
+      product:product,
+      token: checkToken.raw() 
     }).error( function(){
       console.log('Produk nie został usunięty z bazy - błąd komunikacji api')
     })
@@ -29,12 +32,14 @@ controllersAdmin.controller( 'products' , [ '$scope' , '$http' , function( $scop
      
 }]);
 
-controllersAdmin.controller( 'productEdit' , [ '$scope' , '$http' , '$routeParams' , 'FileUploader' , '$timeout' , function( $scope , $http , $routeParams, FileUploader, $timeout ){
+controllersAdmin.controller( 'productEdit' , [ '$scope' , '$http' , '$routeParams' , 'FileUploader' , '$timeout', 'checkToken' , function( $scope , $http , $routeParams, FileUploader, $timeout, checkToken ){
 
   var productId = $routeParams.id ; //do wyswietlania zdjec
   $scope.id = productId;
 
-  $http.get( 'api/admin/products/get/' + productId ).
+  $http.post( 'api/admin/products/get/' + productId, {
+    token: checkToken.raw()
+  } ).
   success( function( data ){
     
     $scope.product = data; // tak było jak nie było połączenia z bazą : $scope.product = products[productId];
@@ -43,19 +48,35 @@ controllersAdmin.controller( 'productEdit' , [ '$scope' , '$http' , '$routeParam
   });
 
   function getImages() {
-  $http.get( 'api/admin/images/get/' + productId).
+  $http.post( 'api/admin/images/get/' + productId, {
+    token: checkToken.raw()
+  }).
   success( function( data ){
     $scope.images = data;
   }).error( function(){
     console.log( 'Błąd pobrania pliku json' );
   });
 
+  $scope.setThumb = function( product, image ) {
+
+    $http.post('api/admin/images/setThumb', {
+      token: checkToken.raw(),
+      product: product,
+      image: image
+    }).error( function(){})
+
+    console.log(image);
+  };
+
   } 
   getImages(); // ta część jest w funkcji, która teraz wywołujemy, żeby działał, poniewaz chcemy, zeby obrazki pojawiały sie zaraz po wstawieniu. 
 
   $scope.saveChanges = function(product) {
                                                 //nazwa parametru i wartość
-    $http.post( 'api/admin/products/update/' ,  { product /*xyz*/ : product} ). //drugim parametrem metody post w nawiasie klamrowym sa dane które chcemy przesłać
+    $http.post( 'api/admin/products/update/' ,  
+    { product /*xyz*/ : product ,
+      token : checkToken.raw()  
+    } ). //drugim parametrem metody post w nawiasie klamrowym sa dane które chcemy przesłać
     success(function( ){
       $scope.success = true;
       $timeout(function(){
@@ -74,7 +95,94 @@ controllersAdmin.controller( 'productEdit' , [ '$scope' , '$http' , '$routeParam
 
     $http.post( 'api/admin/images/del/' , {
       id: productId,
-      image: imageName
+      image: imageName,
+      token: checkToken.raw()
+
+    }).success( function(  ){ 
+      //tu śmiało można wstawic funckje getImages(); i zrezygnowac ze splice wyżej :)
+
+  }).error( function(){
+    console.log( 'Błąd pobrania pliku json' );
+  });
+
+  }
+
+  var uploader = $scope.uploader = new FileUploader({
+    url: 'api/admin/images/upload/' + productId,
+    token: checkToken.raw() // ścieżka do api obsługujcego upload plus id 
+  })
+
+    uploader.filters.push({           // to jest filtr - tylko obrazki (filtruje po rozszerzeniach)
+            name: 'imageFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+});
+
+  uploader.onCompleteItem = function(fileItem, response, status, headers) {     // jeden z wielu callback'ów  odświerza strone zaraz po wrzuceniu, więc obrazek pojawia sie natychmiast, bez odswiezania strony
+            getImages();
+};  
+  
+}]);
+
+controllersAdmin.controller( 'productCreate' , [ '$scope' , '$http', '$timeout', 'FileUploader', '$routeParams', 'checkToken' , function( $scope , $http, $timeout, FileUploader, $routeParams, checkToken){
+
+  var productId = $routeParams.id ; //do wyswietlania zdjec
+  $scope.id = productId;
+
+  $scope.createProduct = function(product) {
+    $http.post( 'api/admin/products/createProduct/' ,  { product /*xyz*/ : product, token: checkToken.raw()} ). 
+    success(function( ){
+      $scope.success = true;
+      $timeout(function(){
+        $scope.product={};
+        $scope.success = false;
+      }, 3000 );
+    }).
+    error(function(){
+      console.log('Błąd pobrania pliku')
+    });
+
+     console.log(product);          
+  };
+
+function getImages() {
+  $http.post( 'api/admin/images/get/' + productId, {
+    token : checkToken.raw()
+  }).
+  success( function( data ){
+    $scope.images = data;
+  }).error( function(){
+    console.log( 'Błąd pobrania pliku json' );
+  });
+
+  } 
+  getImages(); // ta część jest w funkcji, która teraz wywołujemy, żeby działał, poniewaz chcemy, zeby obrazki pojawiały sie zaraz po wstawieniu. 
+
+  $scope.saveChanges = function(product) {
+                                                //nazwa parametru i wartość
+    $http.post( 'api/admin/products/update/' ,  { product /*xyz*/ : product, token: checkToken.raw()} ). //drugim parametrem metody post w nawiasie klamrowym sa dane które chcemy przesłać
+    success(function( ){
+      $scope.success = true;
+      $timeout(function(){
+        $scope.success = false;
+      }, 3000 );
+    }).
+    error(function(){
+      console.log('Błąd pobrania pliku')
+    });
+
+     console.log(product);          
+  };
+
+  $scope.delImg = function( imageName, $index){
+    $scope.images.splice($index, 1);
+
+    $http.post( 'api/admin/images/del/' , {
+      id: productId,
+      image: imageName,
+      token: checkToken.raw()
 
     }).success( function(  ){ 
       //tu śmiało można wstawic funckje getImages(); i zrezygnowac ze splice wyżej :)
@@ -101,34 +209,14 @@ controllersAdmin.controller( 'productEdit' , [ '$scope' , '$http' , '$routeParam
             getImages();
 };  
 
-
- 
 }]);
 
-controllersAdmin.controller( 'productCreate' , [ '$scope' , '$http', '$timeout' , function( $scope , $http, $timeout){
+controllersAdmin.controller( 'users' , [ '$scope' , '$http', 'checkToken',   function( $scope , $http , checkToken){
 
-
-
-  $scope.createProduct = function(product) {
-    $http.post( 'api/admin/products/createProduct/' ,  { product /*xyz*/ : product} ). 
-    success(function( ){
-      $scope.success = true;
-      $timeout(function(){
-        $scope.product={};
-        $scope.success = false;
-      }, 3000 );
-    }).
-    error(function(){
-      console.log('Błąd pobrania pliku')
-    });
-
-     console.log(product);          
-  };
-}]);
-
-controllersAdmin.controller( 'users' , [ '$scope' , '$http' , function( $scope , $http ){
-
-  $http.get( 'api/admin/users/get' ). // opuszczamy application i controllers bo chyba domyslnie to przenosi, ostatnie to funkcja zapisana w kontrolerze
+  
+  $http.post( 'api/admin/users/get', {
+    token: checkToken.raw()
+  } ). // opuszczamy application i controllers bo chyba domyslnie to przenosi, ostatnie to funkcja zapisana w kontrolerze
   success( function( data ){
     $scope.users = data;
   }).error( function(){
@@ -143,7 +231,8 @@ controllersAdmin.controller( 'users' , [ '$scope' , '$http' , function( $scope ,
     $scope.users.splice( $index, 1 ); //(ktory indeks zaczyna, ile elementow usunac, ewentualnie dodac)
 
     $http.post( 'api/admin/users/deleteUser/' , {
-      user : user
+      user : user,
+      token: checkToken.raw()
     }).error( function(){
       console.log('Użytkownik nie został usunięty z bazy - błąd komunikacji api')
     })
@@ -154,20 +243,41 @@ controllersAdmin.controller( 'users' , [ '$scope' , '$http' , function( $scope ,
 
 
 
-controllersAdmin.controller( 'orders' , [ '$scope' , '$http' , function( $scope , $http ){
+controllersAdmin.controller( 'orders' , [ '$scope' , '$http', 'checkToken' , function( $scope , $http, checkToken ){
 
-  $http.get( 'model/orders.json' ).
+  $http.post( 'api/admin/orders/get/', {
+    token: checkToken.raw(),
+    payload: checkToken.payload()
+  } ).
   success( function( data ){
+    console.log(data);
     $scope.orders = data;
+
+    angular.forEach( $scope.orders , function( order , key ){
+      var parsed = JSON.parse( order.items );
+      $scope.orders[key].items = parsed;
+    });
+
   }).error( function(){
     console.log( 'Błąd pobrania pliku json' );
   });
 
-   $scope.delete = function(order, $index){
-    //przeslac dane przez api
-    console.log($scope.orders[$index]);
-    $scope.orders.splice( $index, 1 ); //(ktory indeks zaczyna, ile elementow usunac, ewentualnie dodac)
-      };
+   $scope.delete = function ( order , $index ) {
+
+    if ( !confirm( 'Czy na pewno chcesz usunąć to zamówienie' ) )
+      return false;
+
+    $scope.orders.splice( $index , 1 );
+
+    $http.post( 'api/admin/orders/delete/' , {
+      token: checkToken.raw(),
+      id: order.id
+    }).error( function(){
+      console.log( 'Błąd połączenia z API' );
+    });
+
+  };
+
 
   $scope.changeStatus = function(order) {
     if(order.status == 0){
@@ -176,19 +286,28 @@ controllersAdmin.controller( 'orders' , [ '$scope' , '$http' , function( $scope 
     else{
       order.status = 0;
     }
-    // TODO : oczywiście trzeba to wysłać do bazy
+    
+    $http.post( 'api/admin/orders/update/', {
+      status: order.status ,
+      token: checkToken.raw(),
+      id: order.id
+    }).error(function(){
+      console.log('Błąd połączenia z bazą')
+    })
 
   }
 
 }]);
 
 
-controllersAdmin.controller( 'userEdit' , [ '$scope' , '$http' , '$routeParams' , '$timeout', function( $scope , $http , $routeParams, $timeout ){
+controllersAdmin.controller( 'userEdit' , [ '$scope' , '$http' , '$routeParams' , '$timeout', 'checkToken', function( $scope , $http , $routeParams, $timeout, checkToken ){
 
   var userId = $routeParams.id ; //do wyswietlania zdjec
   $scope.id = userId;
 
-  $http.get( 'api/admin/users/get/' + userId ).
+  $http.post( 'api/admin/users/get/' + userId, {
+    token: checkToken.raw()
+  } ).
   success( function( data ){
         $scope.user = data; // tak było jak nie było połączenia z bazą : $scope.product = products[productId];
   }).error( function(){
@@ -206,7 +325,8 @@ controllersAdmin.controller( 'userEdit' , [ '$scope' , '$http' , '$routeParams' 
       password: user.password,
       passconf: user.passconf,
       role: user.role,
-      id: userId
+      id: userId,
+      token: checkToken.raw()
 
 
      }). //drugim parametrem metody post w nawiasie klamrowym sa dane które chcemy przesłać
@@ -239,7 +359,7 @@ controllersAdmin.controller( 'userEdit' , [ '$scope' , '$http' , '$routeParams' 
 }]);
 
 
-controllersAdmin.controller( 'userCreate' , [ '$scope' , '$http', '$timeout' , function( $scope , $http, $timeout){
+controllersAdmin.controller( 'userCreate' , [ '$scope' , '$http', '$timeout', 'checkToken' , function( $scope , $http, $timeout, checkToken){
 
     $scope.user = {} ;
     $scope.user.role = 'user';
@@ -253,7 +373,8 @@ controllersAdmin.controller( 'userCreate' , [ '$scope' , '$http', '$timeout' , f
       email: user.email,
       password: user.password,
       passconf: user.passconf,
-      role: user.role
+      role: user.role,
+      token: checkToken.raw()
 
     }).success(function(errors){
 

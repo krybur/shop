@@ -83,19 +83,31 @@ controllersSite.controller( 'siteProduct' , [ '$scope' , '$http' , '$routeParams
 
 }]);
 
-controllersSite.controller( 'siteOrders' , [ '$scope' , '$http' , function( $scope , $http ){
-  
-  $http.get('model/orders.json').
-  success(function (data){
-    $scope.orders = data ;
-  }).
-  error(function(){
-        console.log('Błąd pobrania danych');
-      });
+controllersSite.controller( 'siteOrders' , [ '$scope' , '$http' , 'checkToken' , function( $scope , $http , checkToken ){
+
+  $http.post( 'api/site/orders/get/' , {
+
+    token: checkToken.raw(),
+    payload: checkToken.payload()
+
+  }).success( function( data ){
+
+    $scope.orders = data;
+
+    angular.forEach( $scope.orders , function( order , key ){
+      var parsed = JSON.parse( order.items );
+      $scope.orders[key].items = parsed;
+      console.log(parsed);
+    });
+
+  }).error( function(){
+    console.log( 'Błąd połączenia z API' );
+  });
 
 }]);
 
-controllersSite.controller( 'cartCtrl' , [ '$scope' , '$http' , 'cartSrv' , function( $scope , $http, cartSrv ){
+
+controllersSite.controller( 'cartCtrl' , [ '$scope' , '$http' , 'cartSrv', 'checkToken' , function( $scope , $http, cartSrv, checkToken ){
  
   $scope.cartSrv = cartSrv.show();
 
@@ -125,24 +137,31 @@ controllersSite.controller( 'cartCtrl' , [ '$scope' , '$http' , 'cartSrv' , func
 
   $scope.setOrder = function($event) {
 
-    // TODO sprawdzić czy użytkownik zalogowany
-    var loggedIn = true;
-    if (!loggedIn){
+    $event.preventDefault(); // to będzie blokowało wysłanie formularza do paypala, po to by np zapisac zamowienie w bazie wczesniej
+     if (!checkToken.loggedIn())
+     {
       $scope.alert = {type : 'warning' , msg: 'Musisz być zalogowany, żeby złożyć zamowienie' };
-      $event.preventDefault();
+      
       return false ;
 
     }
 
-    //TODO zapisz zamowienie w bazie
+    $http.post( 'api/site/orders/create/' , {
+      token: checkToken.raw(),
+      payload: checkToken.payload(),
+      items: $scope.cartSrv,
+      total: $scope.total()
 
-    console.log($scope.total() );
-    console.log($scope.cartSrv  );
-    $scope.alert = { type : 'success' , msg: 'Zamówienie złożone, nie odświeżaj strony, trwa realizowanie płatności...' }
-    cartSrv.clearCart();
+    }).
+      success( function( data ){
+        cartSrv.clear();
+        $scope.alert = {type: 'success' , msg: "Zamówienie złożone, nie odświeżaj strony, trwa przekierowywanie"};
+        $('#paypalForm').submit() ;
 
-    $event.preventDefault(); // to będzie blokowało wysłanie formularza do paypala, po to by np zapisac zamowienie w bazie wczesniej
-    $('#paypalForm').submit() ;
+      }).error( function(){
+    console.log( 'Błąd połączenia z API' );
+
+  });
 
   }
 
@@ -154,8 +173,11 @@ controllersSite.controller( 'cartCtrl' , [ '$scope' , '$http' , 'cartSrv' , func
 }]);
 
 
-controllersSite.controller( 'login' , [ '$scope' , '$http' , 'store',  function( $scope , $http, store ){
+controllersSite.controller( 'login' , [ '$scope' , '$http' , 'store', 'checkToken', '$location',  function( $scope ,  $http, store, checkToken, $location ){
   
+ if ( checkToken.loggedIn())
+    $location.path('/products');
+ 
   $scope.user = {};
 
   $scope.formSubmit = function(user){
@@ -166,18 +188,23 @@ controllersSite.controller( 'login' , [ '$scope' , '$http' , 'store',  function(
 
         $scope.submit = true;
         $scope.error = data.error;
-
+        
+        
         if(!data.error){
 
           store.set('token', data.token);
+         location.reload();
+
+
         }
 
     }).error( function() {
       console.log('Błąd połączenia z API');
     });
+   
     };
 
-    console.log(store.get('token'));
+   console.log(checkToken.payload());
   
 }]);
 

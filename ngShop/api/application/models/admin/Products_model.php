@@ -35,6 +35,12 @@ class Products_model extends CI_Model {
 		$this->db->where('id' , $product['id']);
 		$this->db->delete('products'); //no to juz nie trzeba dodawać produktu bo usuwa
 	}
+		public function setThumb($productId , $product) {
+
+		$this->db->where('id' , $productId);
+		$this->db->update('products', $product); // pobieramy rekord o id równym temu obiektowi i updateujemy tabele products produktem
+
+	}
 
 }
 

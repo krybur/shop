@@ -28,9 +28,10 @@
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="cartSrv" ng-class="{ active : isActive( '/cart' ) }"><a href="#/cart">Koszyk</a></li>
         <li ng-class="{ active : isActive( '/orders' ) }"><a href="#/orders">Zamówienia</a></li>
-        <li ng-class="{ active : isActive( '/login' ) }"><a href="#/login">Logowanie</a></li>  <!-- w angularze przekierowania po haszu -->
-        <li ng-class="{ active : isActive( '/register' ) }"><a href="#/register">Rejestracja</a></li>  <!-- w angularze przekierowania po haszu -->
-        <li ng-class="{ active : isActive( '/admin' ) }"><a href="#admin/users">Admin</a></li> 
+        <li ng-class="{ active : isActive( '/login' ) }" ng-if = "!loggedIn"><a href="#/login">Logowanie</a></li>  <!-- w angularze przekierowania po haszu -->
+        <li ng-class="{ active : isActive( '/logout' ) }" ng-if = "loggedIn"><a href="#/logout"ng-click="logout()">Wyloguj</a></li> 
+        <li ng-class="{ active : isActive( '/register' ) }" ng-if = "!loggedIn"><a href="#/register">Rejestracja</a></li>  <!-- w angularze przekierowania po haszu -->
+        <li ng-class="{ active : isActive( '/admin' ) }" ng-if = "isAdmin"><a href="#admin/users">Admin</a></li> 
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

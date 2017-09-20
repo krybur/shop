@@ -29,7 +29,6 @@ class User_model extends CI_Model {
 		if ( empty($result) || !hash_equals($result->password, $password) ) // jeśli nie ma takiego użytkownika o takim emailu lub email przesłany przez formularz dla użytkownika o takim mailu sie nie zgadza 
 			{
 				$output = false;
-				var_dump($output);
 			}
 		else
 		{
