@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Czas generowania: 20 Wrz 2017, 21:10
+-- Czas generowania: 20 Wrz 2017, 21:53
 -- Wersja serwera: 10.1.13-MariaDB
 -- Wersja PHP: 7.0.6
 
@@ -101,16 +101,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `role`, `password`, `passconf`) VALUES
-(11, 'Maria', 'marys2@vp.pl', 'user', 'kupa', 'kupa'),
-(12, 'Ala', 'all@gmail.com', 'user', 'alicja', 'alicja'),
-(13, 'Kamil', 'kamil@wp.pl', 'user', '', ''),
-(15, 'olaf', 'lubaszenko@aktor.pl', 'user', 'kk', 'kk'),
-(29, 'Ola', 'olka@wp.pl', 'user', 'masa', 'masa'),
-(30, 'Olaf', 'lubaszenko@lb.pl', '', 'oooo', 'oooo'),
 (31, 'kuba', 'po@po.pl', 'user', 'c6HsNvyNr.9U2', 'iii'),
 (43, 'test', 'test@test.pl', 'user', 'c650dAPU6Fyjw', ''),
 (44, 'kbr', 'ja@ja.pl', 'admin', 'c6IuItPlZ.BxU', ''),
-(45, 'Wojtek', 'wojtek_bur@wp.pl', 'user', 'dupa1', 'dupa1');
+(46, 'marysia', 'maria@wp.pl', 'user', 'c6SIzueS2Oj1.', 'adsd');
 
 --
 -- Indeksy dla zrzutów tabel
@@ -152,7 +146,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT dla tabeli `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
